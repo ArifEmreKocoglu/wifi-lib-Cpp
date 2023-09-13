@@ -1,0 +1,37 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Connector</title>
+</head>
+<body>
+    <button id="scanBtn">Scan Networks</button>
+    <ul id="networkList"></ul>
+    <div id="connectFormContainer">
+        <label>
+            SSID: <input id="ssidInput" readonly>
+        </label>
+        <label>
+            Password: <input id="passwordInput" type="password">
+        </label>
+        <button id="connectBtn">Connect</button>
+    </div>
+    <button id="disconnectBtn">Disconnect</button>
+
+    <div>
+        <span id="currentNet"></span>
+    </div>
+
+    <button id="netDetailsButton">Show Details Net</button>
+    <p id="netDetails"></p>
+
+    <button id="speedTestButton">start speed test</button>
+
+    <span id="speed"></span>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
