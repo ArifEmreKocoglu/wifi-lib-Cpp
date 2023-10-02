@@ -95,6 +95,7 @@ std::map<std::string, std::string> get_speed_values() {
 }
 
 
+
 std::map<std::string, std::string> get_network_details() {
     std::map<std::string, std::string> details;
 
@@ -130,18 +131,67 @@ std::map<std::string, std::string> get_network_details() {
 }
 
 
+int get_network_id() {
+    FILE* pipe = popen("wpa_cli -i wlxf81a6723722a add_network", "r");
+    if (!pipe) return -1;
 
-bool connect_to_network(const std::string& ssid, const std::string& password) { // net ismi ve şifresi ile bağlantı sağlanır 
-    std::string command = "nmcli dev wifi connect '" + ssid + "' password '" + password + "'";
-    int result = system(command.c_str());
-    if(result == 1)
-        get_current_connection();
-    return result == 0; // Eğer komut başarıyla çalıştırıldıysa true döndür, değilse false döndür.
+    char buffer[128];
+    std::string result = "";
+    while (!feof(pipe)) {
+        if (fgets(buffer, 128, pipe) != nullptr)
+            result += buffer;
+    }
+    pclose(pipe);
+
+    try {
+        return std::stoi(result);
+    } catch (...) {
+        return -1;
+    }
 }
 
+bool connect_to_network(const std::string& ssid, const std::string& password) {
+    system("wpa_cli -i wlxf81a6723722a disconnect");
+    
+    int network_id = get_network_id();
+    if (network_id == -1) {
+        return false;
+    }
+
+    std::string setup_command = "wpa_cli -i wlxf81a6723722a set_network " + std::to_string(network_id) 
+                                + " ssid '\""+ ssid +"\"' && "
+                                + "wpa_cli -i wlxf81a6723722a set_network " + std::to_string(network_id)
+                                + " psk '\""+ password +"\"' && "
+                                + "wpa_cli -i wlxf81a6723722a select_network " + std::to_string(network_id);
+
+    int result = system(setup_command.c_str());
+
+    if(result != 0)
+        get_current_connection();
+    return result == 0;
+}
+
+
+
 bool disconnect_from_network() {
-    int result = system("nmcli dev disconnect wlxf81a6723722a");
+    // wpa_cli ile bağlantıyı kes
+    int result = system("wpa_cli -i wlxf81a6723722a disconnect");
     if(result == 1)
         get_current_connection();
     return result == 0;
 }
+
+// bool connect_to_network(const std::string& ssid, const std::string& password) { // net ismi ve şifresi ile bağlantı sağlanır 
+//     std::string command = "nmcli dev wifi connect '" + ssid + "' password '" + password + "'";
+//     int result = system(command.c_str());
+//     if(result == 1)
+//         get_current_connection();
+//     return result == 0; // Eğer komut başarıyla çalıştırıldıysa true döndür, değilse false döndür.
+// }
+
+// bool disconnect_from_network() {
+//     int result = system("nmcli dev disconnect wlxf81a6723722a");
+//     if(result == 1)
+//         get_current_connection();
+//     return result == 0;
+// }
